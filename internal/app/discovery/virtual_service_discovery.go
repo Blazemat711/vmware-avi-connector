@@ -3,8 +3,8 @@ package discovery
 import (
 	"fmt"
 
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
-	vmwareavi "github.com/venafi/vmware-avi-connector/internal/app/vmware-avi"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
+	vmwareavi "github.com/venafi/vmware-vcenter-connector/internal/app/vmware-vcenter"
 	"github.com/vmware/alb-sdk/go/models"
 	"github.com/vmware/alb-sdk/go/session"
 	"go.uber.org/zap"
@@ -45,3 +45,4 @@ func processVirtualServices(client *domain.Client, clientServices vmwareavi.Clie
 
 	return nil
 }
+

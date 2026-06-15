@@ -11,7 +11,7 @@ import (
 	"github.com/vmware/alb-sdk/go/models"
 	"github.com/vmware/alb-sdk/go/session"
 
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
 	"go.uber.org/zap"
 )
 
@@ -230,3 +230,4 @@ func (svc *WebhookServiceImpl) isSameCertificate(client *domain.Client, keystore
 
 	return nil, false, nil // there is no existing certificate named with value of keystore.CertificateName
 }
+

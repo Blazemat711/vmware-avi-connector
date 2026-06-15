@@ -15,8 +15,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
-	"github.com/venafi/vmware-avi-connector/internal/app/vmware-avi/mocks"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/vmware-vcenter/mocks"
 	"github.com/vmware/alb-sdk/go/models"
 	"github.com/vmware/alb-sdk/go/session"
 	"go.uber.org/mock/gomock"
@@ -779,3 +779,4 @@ func TestDiscovery(t *testing.T) {
 		}
 	})
 }
+

@@ -1,7 +1,7 @@
 # Local builds will use local docker for buildkit server. This is set on
 BUILDX_BUILDER_NAME	?= default
 CONNECTOR_MAIN_GO   ?= main.go
-CONNECTOR_NAME      ?= vmware-avi-connector
+CONNECTOR_NAME      ?= vmware-vcenter-connector
 LD_FLAGS            ?= "-w -s"
 TAG                 ?= latest
 
@@ -136,3 +136,4 @@ lint:
 .PHONY: test
 test:
 	go test -cover ./...
+

@@ -7,7 +7,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
 	"github.com/vmware/alb-sdk/go/clients"
 	"github.com/vmware/alb-sdk/go/models"
 	"github.com/vmware/alb-sdk/go/session"
@@ -262,3 +262,4 @@ func (c *VMwareAviClientsImpl) UpdateVirtualService(client *domain.Client, obj *
 
 	return unwrapped.VirtualService.Update(obj, options...)
 }
+

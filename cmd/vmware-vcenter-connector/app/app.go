@@ -2,9 +2,8 @@
 package app
 
 import (
-	"github.com/venafi/vmware-avi-connector/internal/app/discovery"
-	vmwareavi "github.com/venafi/vmware-avi-connector/internal/app/vmware-avi"
-	"github.com/venafi/vmware-avi-connector/internal/handler/web"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/vcenter"
+	"github.com/venafi/vmware-vcenter-connector/internal/handler/web"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,9 +17,8 @@ func New() *fx.App {
 		fx.Provide(
 			configureLogger,
 			web.ConfigureHTTPServers,
-			fx.Annotate(vmwareavi.NewVMwareAviClients, fx.As(new(vmwareavi.ClientServices))),
-			fx.Annotate(discovery.NewDiscoveryService, fx.As(new(vmwareavi.DiscoveryService))),
-			fx.Annotate(vmwareavi.NewWebhookService, fx.As(new(web.WebhookService))),
+			fx.Annotate(vcenter.NewVcenterClients, fx.As(new(vcenter.ClientServices))),
+			fx.Annotate(vcenter.NewWebhookService, fx.As(new(web.WebhookService))),
 		),
 		fx.Invoke(
 			web.RegisterHandlers,
@@ -28,7 +26,7 @@ func New() *fx.App {
 		fx.Populate(&logger),
 	)
 
-	logger.Info("VMware AVI connector starting")
+	logger.Info("vCenter connector starting")
 
 	return app
 }
@@ -52,3 +50,4 @@ func configureLogger() (*zap.Logger, error) {
 	zap.RedirectStdLog(zap.L())
 	return zap.L(), nil
 }
+

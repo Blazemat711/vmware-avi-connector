@@ -12,7 +12,7 @@ package mocks
 import (
 	reflect "reflect"
 
-	domain "github.com/venafi/vmware-avi-connector/internal/app/domain"
+	domain "github.com/venafi/vmware-vcenter-connector/internal/app/domain"
 	models "github.com/vmware/alb-sdk/go/models"
 	session "github.com/vmware/alb-sdk/go/session"
 	gomock "go.uber.org/mock/gomock"
@@ -240,3 +240,4 @@ func (mr *MockClientServicesMockRecorder) UpdateVirtualService(client, obj any, 
 	varargs := append([]any{client, obj}, options...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVirtualService", reflect.TypeOf((*MockClientServices)(nil).UpdateVirtualService), varargs...)
 }
+

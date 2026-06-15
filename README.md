@@ -1,8 +1,8 @@
 [![Venafi](https://raw.githubusercontent.com/Venafi/.github/master/images/Venafi_logo.png)](https://www.venafi.com/)
 [![MPL 2.0 License](https://img.shields.io/badge/License-MPL%202.0-blue.svg)](https://opensource.org/licenses/MPL-2.0)
 
-# vmware-avi-connector
-Sample TLS Protect Cloud machine connector 
+# vmware-vcenter-connector
+Sample TLS Protect Cloud machine connector for VMware vCenter  
 
 
 # Dependencies
@@ -27,7 +27,7 @@ export CONTAINER_REGISTRY=company.jfrog.io/connectors/vmware
 # Venafi Satellite
 A Venafi Satellite is a customer-hosted infrastructure component designed to provide certain functionality within the customer's network, such as private network discovery and integrations, among other services. The Venafi Satellite provides private services within a customer's network by making communications from the customer network to TLS Protect Cloud, requiring only outbound communication and connectivity to manage endpoints.
 
-To support integrations with other systems, such as a VMware NSX Advanced Load Balancer, developers can create a machine connector to perform predefined functions.   A machine connector is a plugin that acts as a middleware to communicate between the Venafi Platform and any 3rd party applications. The connector is responsible for authenticating, pushing, and configuring the certificate from Venafi to any application of the developer's choice.
+To support integrations with other systems, such as VMware vCenter, developers can create a machine connector to perform predefined functions.   A machine connector is a plugin that acts as a middleware to communicate between the Venafi Platform and any 3rd party applications. The connector is responsible for authenticating, pushing, and configuring the certificate from Venafi to any application of the developer's choice.
 
 In the Venafi world, every connector is a REST-based web service with certain predefined APIs implemented to perform a specific provisioning or discovery task. A machine connector is composed of three parts.
 - An executable that is run within a container.  The executable uses a web framework to receive incoming requests from a service within the Venafi Satellite.  The request is processed, and the response is returned to the internal service, which then sends the result to VaaS.
@@ -40,14 +40,14 @@ Additional resources for developing a machine connector are available at [Venafi
 
 
 # Provisioning Connector Basics
-A machine connector must always support provisioning a certificate, private key and the issuing certificate chain to a target such as a VMware NSX Advanced Load Balancer (Avi).
+A machine connector must always support provisioning a certificate, private key and the issuing certificate chain to a target such as VMware vCenter.
 
 ## Manifest
 The manifest.json file contains the definitions for connection, provisioning, and discovery operations.  These definitions are also used in the TLS Protect Cloud UI for using the machine connector.
 As data is exchanged with the machine connector that data is validated against the manifest.json file.  The only field names and values permitted are those defined within the file.  For example, if the connection JSON node defines a username and a password property, then only those field names and values are sent to the machine connector as part of the connection data.  Additionally, only field names and values defined in the keystore node are permitted as a response to a discovery operation.
 
 The manifest is a JSON document with a defined structure and required nodes.  The top-level node must have the following fields:
-- ___name___: the required name of the machine connector, such as "VMware NSX Advanced Load Balancer (AVI)".  This value is shown in the TLS Protect Cloud UI.
+- ___name___: the required name of the machine connector, such as "VMware vCenter".  This value is shown in the TLS Protect Cloud UI.
 - ___pluginType___: a required field for a machine connector, and the value must be "MACHINE"
 - ___workTypes___: a required collection of strings indicating the capabilities of the machine connector.  All machine connectors are required to support provisioning operations and must have a value of "PROVISIONING" in the collection.  Optionally, if the machine connector supports discovery, the value "DISCOVERY" should also be included.
 
@@ -336,8 +336,8 @@ When the machine connector receives the request, the request body is automatical
 All machine connectors must support provisioning operations.  When a certificate is provisioned using a machine connector, the certificate, private key, and issuing certificate chain are sent to the connector using Venafi defined certificateBundle definition and the developer defined keystore in the manifest domainSchema node. 
 
 - ___keystore___: a required node within the domainSchema, defining the properties needed to determine how a certificate, private-key, and the issuing certificate chain are stored on the device host.  In this machine connector, the property definitions are:
-  - _certificateName_: The name for how the certificate should appear on the VMware NSX-ALB.
-  - _tenant_: The name of the tenant on the VMware NSX-ALB.
+  - _certificateName_: The name for how the certificate should appear in vCenter.
+  - _tenant_: The name of the vCenter tenant or folder.
 
 The keystore property definitions are used to render the TLS Protect Cloud user interface Certificate Information. The values provided are included in the request document.
 ![alt text](images/Keystore.png)
@@ -412,7 +412,7 @@ The second part of a provisioning operation is initiated after the machine conne
 
 In this sample connector, the configureInstallationEndpoint operation is used to configure a virtual service to use the newly installed certificate, private key, and the issuing certificate chain.
 - ___binding___: a node within the domainSchema, defining the properties needed to determine how a certificate, private-key, and the issuing certificate chain are consumed on the device host.  In this machine connector, the property definitions are:
-  - _virtualServiceName_: the name of the virtual service on the VMware AVI to be configured.
+  - _virtualServiceName_: the name of the target vCenter service or endpoint to be configured.
 
 The binding property definitions are used to render the TLS Protect Cloud user interface Installation Endpoint. The values provided are included in the request document.
 
@@ -596,9 +596,9 @@ The messages collection contains one, but not more than maxResults, JSON documen
 ```
 
 # Code
-The application's main function can be found in cmd/vmware-avi-connector/main.go.  The function calls the cmd/vmware-avi-connector/app/app.go ***New()*** function.
+The application's main function can be found in cmd/vmware-vcenter-connector/main.go.  The function calls the cmd/vmware-vcenter-connector/app/app.go ***New()*** function.
 
-The applications REST API handlers can be found in the internal/handler/web/web.go file.  The WebhookService interface is implemented by the WebhookServiceImpl defined in internal/app/vmware-avi/vmware_avi.go.  The REST API handlers use those implementations to fulfill each machine connector provisioning and discovery operations.
+The applications REST API handlers can be found in the internal/handler/web/web.go file.  The WebhookService interface is implemented by the WebhookServiceImpl defined in internal/app/vcenter/vcenter.go.  The REST API handlers use those implementations to fulfill each machine connector provisioning and discovery operations.
 
 The data structures that match the definitions in the manifest domainSchema can be found in the internal/app/domain subdirectory.  The JSON annotations define the field names and must match the property names in the corresponding manifest.json properties definitions.
 - certificate_bundle.go
@@ -606,7 +606,7 @@ The data structures that match the definitions in the manifest domainSchema can 
 - keystore.go
 - binding.go
 
-The code implementing the logic for the machine connector provisioning operations can be found in internal/app/vmware-avi:
+The code implementing the logic for the machine connector provisioning operations can be found in internal/app/vcenter:
 - test_connection.go
 - install.go
 - configure.go
@@ -614,7 +614,7 @@ The code implementing the logic for the machine connector provisioning operation
 The code implementing the logic for the machine connector discovery operation can be found in internal/app/discovery:
 - discovery.go.
 
-Comments in the aforementioned source code files describe both the common code that can be used by most machine connectors and the code that is specific to interacting with a VMware AVI host.
+Comments in the aforementioned source code files describe both the common code that can be used by most machine connectors and the code that is specific to interacting with a VMware vCenter host.
 
 # Building
 This machine connector includes a Makefile with targets for building the application.  This container image can be stored in your container registry to generate the final manifest file for creating or updating a connector. 
@@ -636,12 +636,12 @@ Some of the Makefile targets are:
 You can chain the targets together to clean, build, and push in a single command:
 
 ```text
-vmware-avi-connector % CONTAINER_REGISTRY=sample.io/dev-local TAG=demo make clean build push
+vmware-vcenter-connector % CONTAINER_REGISTRY=sample.io/dev-local TAG=demo make clean build push
 go mod download
-go generate github.com/venafi/vmware-avi-connector/...
+go generate github.com/venafi/vmware-vcenter-connector/...
 mkdir -p output/bin
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o output/bin/vmware-avi-connector ./cmd/vmware-avi-connector/main.go
-docker --context=default buildx build --output type=image,name=sample.io/dev-local/tls-protect-vmware-avi-connector:demo,push=true --metadata-file=buildx-digest.json \
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o output/bin/vmware-vcenter-connector ./cmd/vmware-vcenter-connector/main.go
+docker --context=default buildx build --output type=image,name=sample.io/dev-local/tls-protect-vmware-vcenter-connector:demo,push=true --metadata-file=buildx-digest.json \
                 --target image \
                 --file build/Dockerfile \
                  \
@@ -656,25 +656,25 @@ docker --context=default buildx build --output type=image,name=sample.io/dev-loc
  => [1/3] FROM gcr.io/distroless/static-debian11@sha256:8ad6f3ec70dad966479b9fb48da991138c72ba969859098ec689d1450c2e6c97                                                                                                                                                                                           0.0s
  => [internal] load build context                                                                                                                                                                                                                                                                                  0.1s
  => => transferring context: 11.65MB                                                                                                                                                                                                                                                                               0.1s
- => CACHED [2/3] COPY output/bin/vmware-avi-connector /bin                                                                                                                                                                                                                                                         0.0s
+ => CACHED [2/3] COPY output/bin/vmware-vcenter-connector /bin                                                                                                                                                                                                                                                         0.0s
  => CACHED [3/3] COPY manifest.json /bin                                                                                                                                                                                                                                                                           0.0s
  => exporting to image                                                                                                                                                                                                                                                                                             0.0s
  => => exporting layers                                                                                                                                                                                                                                                                                            0.0s
  => => writing image sha256:94cdc318e7df9d7a3e62993d407104cef779d8e753bcc9922b9aef75f3d00c99                                                                                                                                                                                                                       0.0s
- => => naming to sample.io/dev-local/tls-protect-vmware-avi-connector:demo                                                                                                                                                                                                       0.0s
- => pushing sample.io/dev-local/tls-protect-vmware-avi-connector:demo with docker                                                                                                                                                                                                1.7s
+ => => naming to sample.io/dev-local/tls-protect-vmware-vcenter-connector:demo                                                                                                                                                                                                       0.0s
+ => pushing sample.io/dev-local/tls-protect-vmware-vcenter-connector:demo with docker                                                                                                                                                                                                1.7s
  => => pushing layer 5ae95b28c6a6                                                                                                                                                                                                                                                                                  1.4s
  => => pushing layer 39f83f69b805                                                                                                                                                                                                                                                                                  1.4s
  => => pushing layer 5b1fa8e3e100                                                                                                                                                                                                                                                                                  1.4s
 
 View build details: docker-desktop://dashboard/build/default/default/4av1qc89o68z7pe5rhlbnxj4q
-vmware-avi-connector %
+vmware-vcenter-connector %
 ```
 
 # Testing
 To test the machine connector operations, you can POST requests to the endpoints defined in the manifest.json hooks.mapping definition.  These endpoints must match those registered in the internal/handler/web/web.go RegisterHandlers function.
 
-The body for POST must be a JSON document that matches the corresponding operations request structure.  For example, in this machine connector the hook.mapping path for ___testconnection___ is "/v1/testconnection".  The registered handler is implemented in the internal/app/vmware-avi/test_connection.go HandleTestConnection function.  The request structure for test connection is TestConnectionRequest:
+The body for POST must be a JSON document that matches the corresponding operations request structure.  For example, in this machine connector the hook.mapping path for ___testconnection___ is "/v1/testconnection".  The registered handler is implemented in the internal/app/vcenter/test_connection.go HandleTestConnection function.  The request structure for test connection is TestConnectionRequest:
 ```go
 type TestConnectionRequest struct {
 	Connection *domain.Connection `json:"connection"`
@@ -709,7 +709,7 @@ The "/v1/testconnection" body would then be:
 
 > **_Note_**: The field values in the body should not be encrypted.  When this sample machine connector is run, a decryption middleware is added, which decrypts the body of a request if the data encryption key pair is present. When running locally, no key pair is expected. When running in a Venafi Satellite, the encrypted body is decrypted by the middleware before being received by the handler function.
 
-You can run the cmd/vmware-avi-connector/main.go main function in the debugger and set a breakpoint in internal/app/vmware-avi/test_connection.go HandleTestConnection function.  With the machine connector started you can send a POST operation to http://localhost:8080/v1/testconnection.  The web server is started by a machine connector.
+You can run the cmd/vmware-vcenter-connector/main.go main function in the debugger and set a breakpoint in internal/app/vcenter/test_connection.go HandleTestConnection function.  With the machine connector started you can send a POST operation to http://localhost:8080/v1/testconnection.  The web server is started by a machine connector.
 
 > **_Note_**: The content-type header should have a value of application/json.
 
@@ -726,3 +726,4 @@ To Update an existing machine connector for your tenant you can use the [Update 
 Additionally, you can use the [Disable a local plugin](https://developer.venafi.com/tlsprotectcloud/reference/post-v1-plugins-id-exclusions) REST API to flag the machine connector as disabled.  Disabling a machine connector prevents new machines from being created using the disabled machine connector.  This can be useful to deploy your plugin, create one, or more, machine instances for testing, and then disable the machine connector to prevent additional machines from being created during production testing.  You can use the [Remove plugin disablement](https://developer.venafi.com/tlsprotectcloud/reference/delete-v1-plugins-id-exclusions) REST API to re-enable your machine connector to create new machines.
 
 Finally, you can use the [Delete a local plugin](https://developer.venafi.com/tlsprotectcloud/reference/delete-v1-plugins-id) REST API to remove the machine connector from your TLS Protect Cloud tenant.  This API can only be used once all machines associated with the machine connector have been deleted.
+

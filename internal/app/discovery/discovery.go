@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
-	vmwareavi "github.com/venafi/vmware-avi-connector/internal/app/vmware-avi"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
+	vmwareavi "github.com/venafi/vmware-vcenter-connector/internal/app/vmware-vcenter"
 	"github.com/vmware/alb-sdk/go/models"
 	"go.uber.org/zap"
 )
@@ -190,3 +190,4 @@ func (svc *DiscoveryService) runDiscover(client *domain.Client, control *Discove
 		return nil
 	}
 }
+

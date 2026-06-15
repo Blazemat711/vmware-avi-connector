@@ -2,9 +2,10 @@
 package main
 
 import (
-	"github.com/venafi/vmware-avi-connector/cmd/vmware-avi-connector/app"
+	"github.com/venafi/vmware-vcenter-connector/cmd/vmware-vcenter-connector/app"
 )
 
 func main() {
 	app.New().Run()
 }
+

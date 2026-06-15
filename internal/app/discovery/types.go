@@ -1,6 +1,6 @@
 package discovery
 
-import "github.com/venafi/vmware-avi-connector/internal/app/domain"
+import "github.com/venafi/vmware-vcenter-connector/internal/app/domain"
 
 type discoveredCertificateAndURL struct {
 	Name   string
@@ -77,3 +77,4 @@ type MachineIdentity struct {
 	// The binding values for a certificate as defined in the manifest.json
 	Binding *domain.Binding `json:"binding"`
 }
+

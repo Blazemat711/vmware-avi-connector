@@ -10,8 +10,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/venafi/vmware-avi-connector/internal/app/domain"
-	"github.com/venafi/vmware-avi-connector/internal/app/vmware-avi/mocks"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/domain"
+	"github.com/venafi/vmware-vcenter-connector/internal/app/vmware-vcenter/mocks"
 	"go.uber.org/mock/gomock"
 )
 
@@ -88,3 +88,4 @@ func setupPost(e *echo.Echo, path string, body io.Reader) (*httptest.ResponseRec
 	recorder := httptest.NewRecorder()
 	return recorder, e.NewContext(request, recorder)
 }
+

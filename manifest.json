@@ -1,7 +1,14 @@
 {
-    "name": "VMware AVI Connector",
-    "description": "Manages SSL/TLS certificates on VMware AVI Controller clusters",
+    "name": "VMware vCenter Connector",
+    "description": "Manages SSL/TLS certificates on VMware vCenter appliances",
     "pluginType": "MACHINE",
+    "workTypes": [
+        "PROVISIONING"
+    ],
+    "deployment": {
+        "executionTarget": "vsat",
+        "image": "docker.io/yourregistry/vcenter-connector:latest"
+    },
     "domainSchema": {
         "connection": {
             "properties": {
@@ -74,145 +81,38 @@
                     "x-labelLocalizationKey": "certificateName.label",
                     "x-rank": 0
                 },
-                "chainName": {
+                "tenant": {
+                    "description": "tenant.description",
                     "type": "string",
-                    "x-labelLocalizationKey": "chainName.label",
+                    "x-labelLocalizationKey": "tenant.label",
                     "x-rank": 1
-                },
-                "partition": {
-                    "description": "partition.description",
-                    "type": "string",
-                    "maxLength": 64,
-                    "x-labelLocalizationKey": "partition.label",
-                    "x-rank": 2,
-                    "x-targetConfigurationRef": "/partitions"
                 }
             },
             "required": [
-                "certificateName",
-                "chainName"
+                "certificateName"
             ],
             "type": "object",
             "x-labelLocalizationKey": "keystore.label",
             "x-primaryKey": [
-                "#/certificateName",
-                "#/partition"
+                "#/certificateName"
             ]
         },
         "binding": {
             "properties": {
-                "sslProfileType": {
-                    "oneOf": [
-                        {
-                            "const": "client",
-                            "x-labelLocalizationKey": "sslProfileType.client"
-                        },
-                        {
-                            "const": "server",
-                            "x-labelLocalizationKey": "sslProfileType.server"
-                        }
-                    ],
-                    "x-labelLocalizationKey": "sslProfileType.label",
+                "virtualServiceName": {
+                    "type": "string",
+                    "x-labelLocalizationKey": "virtualServiceName.label",
                     "x-rank": 0
-                },
-                "parentProfile": {
-                    "description": "parentProfile.description",
-                    "type": "string",
-                    "x-labelLocalizationKey": "parentProfile.label",
-                    "x-rank": 1
-                },
-                "sslProfile": {
-                    "type": "string",
-                    "x-labelLocalizationKey": "sslProfile.label",
-                    "x-rank": 2
-                },
-                "serverName": {
-                    "description": "serverName.description",
-                    "format": "hostname",
-                    "type": "string",
-                    "x-labelLocalizationKey": "serverName.label",
-                    "x-rank": 3,
-                    "x-rule": {
-                        "effect": "SHOW",
-                        "condition": {
-                            "type": "#/properties/sslProfileType"
-                        }
-                    }
                 }
             },
-            "x-primaryKey": [
-                "#/sslProfileType",
-                "#/sslProfile"
-            ],
             "required": [
-                "sslProfile",
-                "sslProfileType"
+                "virtualServiceName"
             ],
             "type": "object",
-            "x-labelLocalizationKey": "binding.label"
-        },
-        "discovery": {
-            "properties": {
-                "discoveryType": {
-                    "oneOf": [
-                        {
-                            "const": "all",
-                            "x-labelLocalizationKey": "discoveryType.all"
-                        },
-                        {
-                            "const": "monitor",
-                            "x-labelLocalizationKey": "discoveryType.monitor"
-                        },
-                        {
-                            "const": "virtualServer",
-                            "x-labelLocalizationKey": "discoveryType.virtualServer"
-                        }
-                    ],
-                    "x-labelLocalizationKey": "discoveryType.label",
-                    "x-rank": 0
-                },
-                "excludeExpiredCertificates": {
-                    "type": "boolean",
-                    "x-labelLocalizationKey": "discovery.expiredCertificatesLabel",
-                    "x-rank": 2
-                },
-                "excludeInactiveProfiles": {
-                    "type": "boolean",
-                    "x-labelLocalizationKey": "discovery.inactiveProfilesLabel",
-                    "x-rank": 3
-                },
-                "partition": {
-                    "default": "Common",
-                    "description": "discovery.partitionDescription",
-                    "maxLength": 64,
-                    "type": "string",
-                    "x-labelLocalizationKey": "discovery.partitionLabel",
-                    "x-rank": 1
-                }
-            },
-            "type": "object"
-        },
-        "discoveryControl": {
-            "properties": {
-                "maxResults": {
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "maxResults"
-            ],
-            "type": "object"
-        },
-        "discoveryPage": {
-            "properties": {
-                "discoveryType": {
-                    "type": "string"
-                },
-                "paginator": {
-                    "type": "string"
-                }
-            },
-            "type": "object"
+            "x-labelLocalizationKey": "binding.label",
+            "x-primaryKey": [
+                "#/virtualServiceName"
+            ]
         }
     },
     "localizationResources": {
@@ -237,6 +137,14 @@
             },
             "binding": {
                 "label": "Server Store Details"
+            },
+            "tenant": {
+                "description": "The tenancy or folder for the certificate in vCenter",
+                "label": "Tenant"
+            },
+            "virtualServiceName": {
+                "description": "The target vCenter entity or service to configure",
+                "label": "Target Service"
             },
             "certificateName": {
                 "description": "How the certificate should appear on the server",
