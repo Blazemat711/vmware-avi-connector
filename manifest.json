@@ -1,14 +1,7 @@
 {
     "name": "VMware vCenter Connector",
-    "description": "Manages SSL/TLS certificates on VMware vCenter appliances",
+    "description": "Manages Machine SSL and Solution User certificates on VMware vCenter Server Appliances",
     "pluginType": "MACHINE",
-    "workTypes": [
-        "PROVISIONING"
-    ],
-    "deployment": {
-        "executionTarget": "vsat",
-        "image": "docker.io/yourregistry/vcenter-connector:latest"
-    },
     "domainSchema": {
         "connection": {
             "properties": {
@@ -75,57 +68,80 @@
         },
         "keystore": {
             "properties": {
-                "certificateName": {
-                    "description": "certificateName.description",
-                    "type": "string",
-                    "x-labelLocalizationKey": "certificateName.label",
+                "certificateType": {
+                    "oneOf": [
+                        {
+                            "const": "machine_ssl",
+                            "x-labelLocalizationKey": "certType.machine"
+                        },
+                        {
+                            "const": "vmca_root",
+                            "x-labelLocalizationKey": "certType.vmca"
+                        }
+                    ],
+                    "x-labelLocalizationKey": "certType.label",
                     "x-rank": 0
                 },
-                "tenant": {
-                    "description": "tenant.description",
-                    "type": "string",
-                    "x-labelLocalizationKey": "tenant.label",
+                "autoRestartServices": {
+                    "type": "boolean",
+                    "default": true,
+                    "x-labelLocalizationKey": "services.restartLabel",
                     "x-rank": 1
                 }
             },
             "required": [
-                "certificateName"
+                "certificateType"
             ],
             "type": "object",
             "x-labelLocalizationKey": "keystore.label",
             "x-primaryKey": [
-                "#/certificateName"
+                "#/certificateType"
             ]
         },
-        "binding": {
+        "discovery": {
             "properties": {
-                "virtualServiceName": {
-                    "type": "string",
-                    "x-labelLocalizationKey": "virtualServiceName.label",
+                "includeExpired": {
+                    "type": "boolean",
+                    "x-labelLocalizationKey": "discovery.expiredLabel",
                     "x-rank": 0
                 }
             },
+            "type": "object"
+        },
+        "discoveryControl": {
+            "properties": {
+                "maxResults": {
+                    "type": "integer"
+                }
+            },
             "required": [
-                "virtualServiceName"
+                "maxResults"
             ],
-            "type": "object",
-            "x-labelLocalizationKey": "binding.label",
-            "x-primaryKey": [
-                "#/virtualServiceName"
-            ]
+            "type": "object"
+        },
+        "discoveryPage": {
+            "properties": {
+                "discoveryType": {
+                    "type": "string"
+                },
+                "paginator": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
         }
     },
     "localizationResources": {
         "en": {
             "address": {
-                "label": "Server Hostname"
+                "label": "vCenter Hostname/IP"
             },
             "port": {
-                "description": "No value is interpreted as 443",
-                "label": "Port"
+                "description": "Defaults to 443 for vCenter vSphere Client APIs",
+                "label": "API Port"
             },
             "username": {
-                "label": "Username"
+                "label": "vCenter Administrator Username"
             },
             "password": {
                 "label": "Password",
@@ -133,57 +149,18 @@
                 "hidePassword": "Hide Password"
             },
             "keystore": {
-                "label": "Certificate Information"
+                "label": "vCenter Target Settings"
             },
-            "binding": {
-                "label": "Server Store Details"
+            "certType": {
+                "label": "Certificate Type",
+                "machine": "Machine SSL Certificate (Reverse Proxy)",
+                "vmca": "VMCA Root Certificate"
             },
-            "tenant": {
-                "description": "The tenancy or folder for the certificate in vCenter",
-                "label": "Tenant"
-            },
-            "virtualServiceName": {
-                "description": "The target vCenter entity or service to configure",
-                "label": "Target Service"
-            },
-            "certificateName": {
-                "description": "How the certificate should appear on the server",
-                "label": "Certificate Name"
-            },
-            "chainName": {
-                "label": "Chain Bundle Name"
-            },
-            "partition": {
-                "description": "No value is interpreted as the \"Common\" partition",
-                "label": "Partition"
-            },
-            "sslProfile": {
-                "label": "SSL Profile"
-            },
-            "parentProfile": {
-                "description": "No value is interpreted as \"clientssl\" or \"serverssl\" depending on the Profile Type selected",
-                "label": "Parent Profile"
-            },
-            "sslProfileType": {
-                "label": "Profile Type",
-                "client": "Client SSL Profile",
-                "server": "Server SSL Profile"
-            },
-            "serverName": {
-                "description": "An alternative DNS name used for Server Name Indication",
-                "label": "SNI"
+            "services": {
+                "restartLabel": "Automatically restart vCenter services after installation"
             },
             "discovery": {
-                "partitionLabel": "Partition(s)",
-                "partitionDescription": "A comma separated list of partition names.",
-                "expiredCertificatesLabel": "Exclude expired certificates",
-                "inactiveProfilesLabel": "Exclude certificates that are not in use by either a virtual server or a monitor."
-            },
-            "discoveryType": {
-                "label": "Resource Types to Discover",
-                "all": "Both Monitors and Virtual Servers",
-                "monitor": "Monitors",
-                "virtualServer": "Virtual Servers"
+                "expiredLabel": "Include expired vCenter certificates in discovery tracking"
             }
         }
     },
