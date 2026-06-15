@@ -1,28 +1,47 @@
 {
-    "name": "VMware NSX Advanced Load Balancer (AVI)",
-    "description": "",
-    "workTypes": [
-        "PROVISIONING",
-        "DISCOVERY"
-    ],
+    "name": "VMware AVI Connector",
+    "description": "Manages SSL/TLS certificates on VMware AVI Controller clusters",
     "pluginType": "MACHINE",
     "domainSchema": {
-        "binding": {
+        "connection": {
             "properties": {
-                "virtualServiceName": {
+                "hostnameOrAddress": {
                     "type": "string",
-                    "x-labelLocalizationKey": "virtualServiceName.label",
+                    "x-labelLocalizationKey": "address.label",
                     "x-rank": 0
+                },
+                "port": {
+                    "description": "port.description",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "type": "integer",
+                    "x-labelLocalizationKey": "port.label",
+                    "x-rank": 1
+                },
+                "username": {
+                    "type": "string",
+                    "x-encrypted": true,
+                    "x-labelLocalizationKey": "username.label",
+                    "x-rank": 2
+                },
+                "password": {
+                    "type": "string",
+                    "x-controlOptions": {
+                        "password": true,
+                        "showPasswordLabel": "password.showPassword",
+                        "hidePasswordLabel": "password.hidePassword"
+                    },
+                    "x-encrypted": true,
+                    "x-labelLocalizationKey": "password.label",
+                    "x-rank": 3
                 }
             },
             "required": [
-                "virtualServiceName"
+                "hostnameOrAddress",
+                "username",
+                "password"
             ],
-            "type": "object",
-            "x-labelLocalizationKey": "binding.label",
-            "x-primaryKey": [
-                "#/virtualServiceName"
-            ]
+            "type": "object"
         },
         "certificateBundle": {
             "properties": {
@@ -47,162 +66,128 @@
             ],
             "type": "object"
         },
-        "connection": {
-            "allOf": [
-                {
-                    "if": {
-                        "properties": {
-                            "credentialType": {
-                                "const": "local"
-                            }
-                        },
-                        "required": [
-                            "credentialType"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "credentialType",
-                            "username",
-                            "password"
-                        ]
-                    }
-                },
-                {
-                    "if": {
-                        "properties": {
-                            "credentialType": {
-                                "const": "shared"
-                            }
-                        },
-                        "required": [
-                            "credentialType"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "credentialType",
-                            "credentialId"
-                        ]
-                    }
-                }
-            ],
+        "keystore": {
             "properties": {
-                "credentialId": {
-                    "description": "credentialId.description",
+                "certificateName": {
+                    "description": "certificateName.description",
                     "type": "string",
-                    "x-credential": {
-                        "authType": "username_password",
-                        "value": "#/properties/credentialId",
-                        "mapping": {
-                            "username": "#/username",
-                            "password": "#/password"
-                        }
-                    },
-                    "x-labelLocalizationKey": "credentialId.label",
-                    "x-rank": 3,
-                    "x-rule": {
-                        "effect": "SHOW",
-                        "condition": {
-                            "scope": "#/properties/credentialType",
-                            "schema": {
-                                "const": "shared"
-                            }
-                        }
-                    }
-                },
-                "credentialType": {
-                    "default": "local",
-                    "description": "credentialType.description",
-                    "oneOf": [
-                        {
-                            "const": "local",
-                            "title": "credentialType.local"
-                        },
-                        {
-                            "const": "shared",
-                            "title": "credentialType.shared"
-                        }
-                    ],
-                    "x-featureKey": "credential_manager_cyberark",
-                    "x-labelLocalizationKey": "credentialType.label",
-                    "x-rank": 2
-                },
-                "hostnameOrAddress": {
-                    "type": "string",
-                    "x-labelLocalizationKey": "address.label",
+                    "x-labelLocalizationKey": "certificateName.label",
                     "x-rank": 0
                 },
-                "password": {
+                "chainName": {
                     "type": "string",
-                    "x-controlOptions": {
-                        "password": true,
-                        "showPasswordLabel": "password.showPassword",
-                        "hidePasswordLabel": "password.hidePassword"
-                    },
-                    "x-encrypted": true,
-                    "x-labelLocalizationKey": "password.label",
-                    "x-rank": 4,
-                    "x-rule": {
-                        "effect": "SHOW",
-                        "condition": {
-                            "scope": "#/properties/credentialType",
-                            "schema": {
-                                "const": "local"
-                            }
-                        }
-                    }
-                },
-                "port": {
-                    "default": 443,
-                    "description": "port.description",
-                    "maximum": 65535,
-                    "minimum": 1,
-                    "type": "integer",
-                    "x-labelLocalizationKey": "port.label",
+                    "x-labelLocalizationKey": "chainName.label",
                     "x-rank": 1
                 },
-                "username": {
+                "partition": {
+                    "description": "partition.description",
                     "type": "string",
-                    "x-encrypted": true,
-                    "x-labelLocalizationKey": "username.label",
+                    "maxLength": 64,
+                    "x-labelLocalizationKey": "partition.label",
+                    "x-rank": 2,
+                    "x-targetConfigurationRef": "/partitions"
+                }
+            },
+            "required": [
+                "certificateName",
+                "chainName"
+            ],
+            "type": "object",
+            "x-labelLocalizationKey": "keystore.label",
+            "x-primaryKey": [
+                "#/certificateName",
+                "#/partition"
+            ]
+        },
+        "binding": {
+            "properties": {
+                "sslProfileType": {
+                    "oneOf": [
+                        {
+                            "const": "client",
+                            "x-labelLocalizationKey": "sslProfileType.client"
+                        },
+                        {
+                            "const": "server",
+                            "x-labelLocalizationKey": "sslProfileType.server"
+                        }
+                    ],
+                    "x-labelLocalizationKey": "sslProfileType.label",
+                    "x-rank": 0
+                },
+                "parentProfile": {
+                    "description": "parentProfile.description",
+                    "type": "string",
+                    "x-labelLocalizationKey": "parentProfile.label",
+                    "x-rank": 1
+                },
+                "sslProfile": {
+                    "type": "string",
+                    "x-labelLocalizationKey": "sslProfile.label",
+                    "x-rank": 2
+                },
+                "serverName": {
+                    "description": "serverName.description",
+                    "format": "hostname",
+                    "type": "string",
+                    "x-labelLocalizationKey": "serverName.label",
                     "x-rank": 3,
                     "x-rule": {
                         "effect": "SHOW",
                         "condition": {
-                            "scope": "#/properties/credentialType",
-                            "schema": {
-                                "const": "local"
-                            }
+                            "type": "#/properties/sslProfileType"
                         }
                     }
                 }
             },
-            "required": [
-                "hostnameOrAddress",
-                "credentialType"
+            "x-primaryKey": [
+                "#/sslProfileType",
+                "#/sslProfile"
             ],
-            "type": "object"
+            "required": [
+                "sslProfile",
+                "sslProfileType"
+            ],
+            "type": "object",
+            "x-labelLocalizationKey": "binding.label"
         },
         "discovery": {
             "properties": {
+                "discoveryType": {
+                    "oneOf": [
+                        {
+                            "const": "all",
+                            "x-labelLocalizationKey": "discoveryType.all"
+                        },
+                        {
+                            "const": "monitor",
+                            "x-labelLocalizationKey": "discoveryType.monitor"
+                        },
+                        {
+                            "const": "virtualServer",
+                            "x-labelLocalizationKey": "discoveryType.virtualServer"
+                        }
+                    ],
+                    "x-labelLocalizationKey": "discoveryType.label",
+                    "x-rank": 0
+                },
                 "excludeExpiredCertificates": {
                     "type": "boolean",
                     "x-labelLocalizationKey": "discovery.expiredCertificatesLabel",
-                    "x-rank": 1
-                },
-                "excludeInactiveCertificates": {
-                    "type": "boolean",
-                    "x-labelLocalizationKey": "discovery.excludeInactiveCertificates",
                     "x-rank": 2
                 },
-                "tenants": {
+                "excludeInactiveProfiles": {
+                    "type": "boolean",
+                    "x-labelLocalizationKey": "discovery.inactiveProfilesLabel",
+                    "x-rank": 3
+                },
+                "partition": {
                     "default": "Common",
-                    "description": "discovery.tenantsDescription",
+                    "description": "discovery.partitionDescription",
                     "maxLength": 64,
                     "type": "string",
-                    "x-labelLocalizationKey": "discovery.tenantsLabel",
-                    "x-rank": 0
+                    "x-labelLocalizationKey": "discovery.partitionLabel",
+                    "x-rank": 1
                 }
             },
             "type": "object"
@@ -210,7 +195,7 @@
         "discoveryControl": {
             "properties": {
                 "maxResults": {
-                    "type": "int"
+                    "type": "integer"
                 }
             },
             "required": [
@@ -228,44 +213,12 @@
                 }
             },
             "type": "object"
-        },
-        "keystore": {
-            "properties": {
-                "certificateName": {
-                    "description": "certificateName.description",
-                    "type": "string",
-                    "x-labelLocalizationKey": "certificateName.label",
-                    "x-rank": 0
-                },
-                "tenant": {
-                    "default": "admin",
-                    "description": "tenant.description",
-                    "type": "string",
-                    "x-labelLocalizationKey": "tenant.label",
-                    "x-rank": 1
-                }
-            },
-            "required": [
-                "certificateName"
-            ],
-            "type": "object",
-            "x-labelLocalizationKey": "keystore.label",
-            "x-primaryKey": [
-                "#/certificateName",
-                "#/tenant"
-            ]
         }
     },
     "localizationResources": {
         "en": {
             "address": {
-                "label": "VMware NSX-ALB Address/Hostname"
-            },
-            "discovery": {
-                "tenantsLabel": "Tenant(s)",
-                "tenantsDescription": "A comma separated list of tenant names.",
-                "expiredCertificatesLabel": "Exclude expired certificates",
-                "excludeInactiveCertificates": "Exclude certificates that are not in use by a virtual service."
+                "label": "Server Hostname"
             },
             "port": {
                 "description": "No value is interpreted as 443",
@@ -283,58 +236,55 @@
                 "label": "Certificate Information"
             },
             "binding": {
-                "label": "VMware Virtual Service Details"
+                "label": "Server Store Details"
             },
             "certificateName": {
-                "label": "Certificate Name",
-                "description": "How the certificate should appear on the VMware NSX-ALB"
+                "description": "How the certificate should appear on the server",
+                "label": "Certificate Name"
             },
-            "credentialId": {
-                "description": "Credentials need to be enabled or created, or you must have access to existing credentials.",
-                "label": "Credential"
+            "chainName": {
+                "label": "Chain Bundle Name"
             },
-            "virtualServiceName": {
-                "label": "Virtual Service"
+            "partition": {
+                "description": "No value is interpreted as the \"Common\" partition",
+                "label": "Partition"
             },
-            "tenant": {
-                "label": "Tenant",
-                "description": "No value is interpreted as the \"admin\" tenant"
+            "sslProfile": {
+                "label": "SSL Profile"
             },
-            "credentialType": {
-                "label": "Credential Type",
-                "shared": "Select Credentials",
-                "local": "Enter Credentials",
-                "description": "Credential types require additional licensing."
+            "parentProfile": {
+                "description": "No value is interpreted as \"clientssl\" or \"serverssl\" depending on the Profile Type selected",
+                "label": "Parent Profile"
+            },
+            "sslProfileType": {
+                "label": "Profile Type",
+                "client": "Client SSL Profile",
+                "server": "Server SSL Profile"
+            },
+            "serverName": {
+                "description": "An alternative DNS name used for Server Name Indication",
+                "label": "SNI"
+            },
+            "discovery": {
+                "partitionLabel": "Partition(s)",
+                "partitionDescription": "A comma separated list of partition names.",
+                "expiredCertificatesLabel": "Exclude expired certificates",
+                "inactiveProfilesLabel": "Exclude certificates that are not in use by either a virtual server or a monitor."
+            },
+            "discoveryType": {
+                "label": "Resource Types to Discover",
+                "all": "Both Monitors and Virtual Servers",
+                "monitor": "Monitors",
+                "virtualServer": "Virtual Servers"
             }
         }
     },
     "hooks": {
         "mapping": {
-            "configureInstallationEndpoint": {
-                "path": "/v1/configureinstallationendpoint",
-                "request": null,
-                "response": null
-            },
-            "discoverCertificates": {
-                "path": "/v1/discovercertificates",
-                "request": null,
-                "response": null
-            },
-            "getTargetConfiguration": {
-                "path": "/v1/gettargetconfiguration",
-                "request": null,
-                "response": null
-            },
-            "installCertificateBundle": {
-                "path": "/v1/installcertificatebundle",
-                "request": null,
-                "response": null
-            },
-            "testConnection": {
-                "path": "/v1/testconnection",
-                "request": null,
-                "response": null
-            }
+            "configureInstallationEndpoint": "/v1/configureinstallationendpoint",
+            "discoverCertificates": "/v1/discovercertificates",
+            "installCertificateBundle": "/v1/installcertificatebundle",
+            "testConnection": "/v1/testconnection"
         },
         "requestConverters": [
             "arguments-decrypter"
